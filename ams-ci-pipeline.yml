@@ -1,0 +1,27 @@
+# ams-ci-pipeline.yml
+# Continuous Integration pipeline for the Access Management System
+
+trigger:
+- develop
+- release/*
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: PowerPlatformToolInstaller@2
+  displayName: 'Install Power Platform Build Tools'
+
+- task: PowerPlatformPackSolution@2
+  displayName: 'Pack Solution'
+  inputs:
+    SolutionSourceFolder: '$(Build.SourcesDirectory)/solutions/AccessManagementSystem'
+    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/AccessManagementSystem_unmanaged.zip'
+    SolutionType: 'Unmanaged'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Unmanaged Solution Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'ams-unmanaged-solution'
+    publishLocation: 'Container'

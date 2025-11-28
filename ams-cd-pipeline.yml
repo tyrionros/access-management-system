@@ -1,0 +1,122 @@
+# ams-cd-pipeline.yml
+# Continuous Deployment pipeline for the Access Management System
+
+trigger: none # This pipeline is triggered by the CI pipeline completion
+
+resources:
+  pipelines:
+  - pipeline: ams-ci # Alias for the CI pipeline
+    source: ams-ci-pipeline # Name of the CI pipeline definition
+    trigger:
+      branches:
+      - develop
+      - release/*
+
+variables:
+  - name: BuildEnvironmentUrl
+    value: 'YOUR_BUILD_ENVIRONMENT_URL'
+  - name: UATEnvironmentUrl
+    value: 'YOUR_UAT_ENVIRONMENT_URL'
+  - name: ProductionEnvironmentUrl
+    value: 'YOUR_PRODUCTION_ENVIRONMENT_URL'
+
+stages:
+- stage: GenerateManagedSolution
+  displayName: 'Generate Managed Solution'
+  jobs:
+  - job: Generate
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: PowerPlatformToolInstaller@2
+      displayName: 'Install Power Platform Build Tools'
+
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Unmanaged Solution'
+      inputs:
+        artifact: 'ams-unmanaged-solution'
+        path: '$(Pipeline.Workspace)/unmanaged'
+
+    - task: PowerPlatformImportSolution@2
+      displayName: 'Import Unmanaged Solution to Build Env'
+      inputs:
+        authenticationType: 'servicePrincipal'
+        PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+        Environment: '$(BuildEnvironmentUrl)'
+        SolutionInputFile: '$(Pipeline.Workspace)/unmanaged/AccessManagementSystem_unmanaged.zip'
+        HoldingSolution: true
+
+    - task: PowerPlatformExportSolution@2
+      displayName: 'Export Managed Solution from Build Env'
+      inputs:
+        authenticationType: 'servicePrincipal'
+        PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+        Environment: '$(BuildEnvironmentUrl)'
+        SolutionName: 'AccessManagementSystem'
+        SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/AccessManagementSystem_managed.zip'
+        Managed: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Managed Solution Artifact'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'ams-managed-solution'
+        publishLocation: 'Container'
+
+- stage: DeployToUAT
+  displayName: 'Deploy to UAT'
+  dependsOn: GenerateManagedSolution
+  jobs:
+  - deployment: DeployUAT
+    pool:
+      vmImage: 'windows-latest'
+    environment: 'UAT'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: PowerPlatformToolInstaller@2
+            displayName: 'Install Power Platform Build Tools'
+
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Managed Solution'
+            inputs:
+              artifact: 'ams-managed-solution'
+              path: '$(Pipeline.Workspace)/managed'
+
+          - task: PowerPlatformImportSolution@2
+            displayName: 'Import Managed Solution to UAT'
+            inputs:
+              authenticationType: 'servicePrincipal'
+              PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+              Environment: '$(UATEnvironmentUrl)'
+              SolutionInputFile: '$(Pipeline.Workspace)/managed/AccessManagementSystem_managed.zip'
+
+- stage: DeployToProduction
+  displayName: 'Deploy to Production'
+  dependsOn: DeployToUAT
+  jobs:
+  - deployment: DeployProduction
+    pool:
+      vmImage: 'windows-latest'
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: PowerPlatformToolInstaller@2
+            displayName: 'Install Power Platform Build Tools'
+
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Managed Solution'
+            inputs:
+              artifact: 'ams-managed-solution'
+              path: '$(Pipeline.Workspace)/managed'
+
+          - task: PowerPlatformImportSolution@2
+            displayName: 'Import Managed Solution to Production'
+            inputs:
+              authenticationType: 'servicePrincipal'
+              PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+              Environment: '$(ProductionEnvironmentUrl)'
+              SolutionInputFile: '$(Pipeline.Workspace)/managed/AccessManagementSystem_managed.zip'
