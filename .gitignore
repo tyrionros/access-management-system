@@ -1,0 +1,23 @@
+# Power Platform and Dynamics 365
+# Solution files
+**/bin/
+**/obj/
+**/*.zip
+**/*.dll
+**/*.pdb
+
+# User-specific files
+*.userprefs
+*.suo
+
+# VS Code
+.vscode/
+
+# Build artifacts
+**/package-deployer/
+**/PackageDeployer.exe
+**/Deployer.dll
+**/SolutionPackage/
+
+# Logs
+*.log
