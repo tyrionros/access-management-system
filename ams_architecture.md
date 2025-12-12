@@ -29,7 +29,7 @@ graph TD
             PA[Power Automate Flows <br/><i>(Approval, Notifications, Logic)</i>]
         end
 
-        subgraph Dataverse as Core
+        subgraph "Dataverse as Core"
             DV_Tables[<b>Custom Tables</b><br/><i>- Access Request<br/>- Application & Role Catalog<br/>- Approval History</i>]
             DV_Security[<b>Security Model</b><br/><i>- AMS Security Roles<br/>- Business Units & Teams</i>]
             DV_Audit[<b>Audit Logs</b><br/><i>(Who, What, When)</i>]
