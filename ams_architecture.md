@@ -23,24 +23,24 @@ graph TD
 
     subgraph PowerPlatform
         direction TB
-        MDA[Model-Driven App <br/><i>(AMS Interface w/ BPF Wizard)</i>]
+        MDA["Model-Driven App <br/><i>(AMS Interface w/ BPF Wizard)</i>"]
         
         subgraph Automation & Logic
-            PA[Power Automate Flows <br/><i>(Approval, Notifications, Logic)</i>]
+            PA["Power Automate Flows <br/><i>(Approval, Notifications, Logic)</i>"]
         end
 
         subgraph "Dataverse as Core"
-            DV_Tables[<b>Custom Tables</b><br/><i>- Access Request<br/>- Application & Role Catalog<br/>- Approval History</i>]
-            DV_Security[<b>Security Model</b><br/><i>- AMS Security Roles<br/>- Business Units & Teams</i>]
-            DV_Audit[<b>Audit Logs</b><br/><i>(Who, What, When)</i>]
+            DV_Tables["<b>Custom Tables</b><br/><i>- Access Request<br/>- Application & Role Catalog<br/>- Approval History</i>"]
+            DV_Security["<b>Security Model</b><br/><i>- AMS Security Roles<br/>- Business Units & Teams</i>"]
+            DV_Audit["<b>Audit Logs</b><br/><i>(Who, What, When)</i>"]
         end
     end
 
     subgraph MicrosoftEcosystem
         direction TB
-        AAD[<b>Azure Active Directory</b><br/><i>User Identity & Authentication</i>]
-        D365[<b>Dynamics 365 Apps</b><br/><i>(Sales, Service, etc.)</i>]
-        Notifications[Outlook / Teams<br/><i>(Approval Emails & Notifications)</i>]
+        AAD["<b>Azure Active Directory</b><br/><i>User Identity & Authentication</i>"]
+        D365["<b>Dynamics 365 Apps</b><br/><i>(Sales, Service, etc.)</i>"]
+        Notifications["Outlook / Teams<br/><i>(Approval Emails & Notifications)</i>"]
     end
 
     %% --- Connections ---
