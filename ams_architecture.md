@@ -21,6 +21,17 @@ graph TD
         C[Access Administrator]
     end
 
+    subgraph CopilotAgentLayer as AI Assistants
+        direction TB
+        Orchestrator["Agent Orchestrator"]
+        subgraph Specialized Agents
+            direction LR
+            RequestorAgent["Requestor Agent"]
+            ApproverAgent["Approver Agent"]
+            AdminAgent["Admin Agent"]
+        end
+    end
+
     subgraph PowerPlatform
         direction TB
         MDA["Model-Driven App <br/><i>(AMS Interface w/ BPF Wizard)</i>"]
@@ -44,9 +55,17 @@ graph TD
     end
 
     %% --- Connections ---
-    A -->|1. Submits Request via| MDA
-    B -->|5. Approves via Link| MDA
-    C -->|Manages System via| MDA
+    A -->|Interacts with| Orchestrator
+    B -->|Interacts with| Orchestrator
+    C -->|Interacts with| Orchestrator
+
+    Orchestrator -->|Delegates to| RequestorAgent
+    Orchestrator -->|Delegates to| ApproverAgent
+    Orchestrator -->|Delegates to| AdminAgent
+
+    RequestorAgent -->|1. Assists with Request via| MDA
+    ApproverAgent -->|5. Provides Summary for| MDA
+    AdminAgent -->|Manages System via| MDA
     
     MDA -->|2. Creates/Updates Record in| DV_Tables
     DV_Tables -->|3. Triggers Flow| PA
@@ -73,7 +92,15 @@ graph TD
     *   **Manager/Approver:** The individual responsible for approving the access request.
     *   **Access Administrator:** The IT or system administrator who configures and manages the AMS.
 
-2.  **Power Platform (Core of the AMS):**
+2.  **Copilot Agent Layer (AI Assistants):**
+    *   This layer acts as an intelligent intermediary, providing contextual assistance to users. It is a modular system designed to host multiple specialized AI agents.
+    *   **Agent Orchestrator:** The central component that receives user input, determines the user's role and intent, and routes the request to the appropriate specialized agent.
+    *   **Specialized Agents:** Individual agents tailored to specific user personas:
+        *   **Requestor Agent:** Helps end-users formulate access requests, suggests appropriate roles, and guides them through the process.
+        *   **Approver Agent:** Provides managers with a summary of the request, risk analysis, and historical context to aid in their decision-making.
+        *   **Admin Agent:** Assists administrators with system configuration, troubleshooting, and querying audit logs.
+
+3.  **Power Platform (Core of the AMS):**
     *   **Model-Driven App:** This is the primary user interface. It hosts the forms, views, and the "New Access Wizard" (Business Process Flow - BPF) that users interact with.
     *   **Power Automate Flows:** The automation engine that runs in the background. It handles the approval logic, sends notifications, and applies the security roles upon approval.
     *   **Dataverse:** The secure and scalable database that underpins the entire solution.
@@ -81,18 +108,18 @@ graph TD
         *   **Security Model:** Contains the custom security roles (`Access Requestor`, `Approver`, etc.) that control what users can see and do within the AMS itself.
         *   **Audit Logs:** The native Dataverse auditing feature, which provides a compliant trail of all actions performed.
 
-3.  **Microsoft Ecosystem (Integrated Systems):**
+4.  **Microsoft Ecosystem (Integrated Systems):**
     *   **Azure Active Directory (AAD / Entra ID):** The foundational identity provider. It manages user identities, authentication (including MFA), and user group memberships. The AMS relies on AAD for all user information.
     *   **Dynamics 365 Apps:** The target applications (Sales, Customer Service, etc.) that the AMS grants access *to*.
     *   **Outlook / Teams:** Used by Power Automate to send approval requests and notifications.
 
 #### Workflow (Numbered in the Diagram)
 
-1.  An **End User** opens the **Model-Driven App** and initiates a new request using the guided "wizard" experience.
+1.  An **End User**, assisted by the **Requestor Agent**, opens the **Model-Driven App** and initiates a new request using the guided "wizard" experience.
 2.  The app creates a new "Access Request" record in the **Dataverse Tables**.
 3.  The creation of this record **triggers a Power Automate Flow**.
 4.  The flow looks up the requestor's manager in **Azure AD** and sends an approval notification via **Outlook/Teams**.
-5.  The **Manager** receives the notification, clicks a link that takes them to the Model-Driven App, and approves or rejects the request.
+5.  The **Manager** receives the notification. The **Approver Agent** can provide them with a summary and context within the Model-Driven App before they approve or reject the request.
 6.  The flow captures the approval and **updates the request record** in Dataverse.
 7.  If approved, the flow assigns the appropriate security role to the user within the **Dataverse Security Model**.
 8.  This newly assigned security role now **grants the user the intended access** to the target **Dynamics 365 App**.
