@@ -13,7 +13,7 @@ This initial step is crucial as it sets the foundation for the entire documentat
     *   **Auditors/Compliance Officers:** They are interested in security, data privacy, and process controls. The documentation should clearly explain how the system enforces security policies, tracks access changes (audit trails), and helps meet regulatory requirements.
 
 *   **1.2. Define the scope:**
-    *   Be explicit about what's included and what's not. For example, your scope might be: "This documentation covers the Access Management Model-Driven App, its custom Dataverse tables, and the associated Power Automate flows. It does not cover the standard features of Microsoft Dynamics 365 or the underlying Azure infrastructure."
+    *   Be explicit about what's included and what's not. For example, your scope might be: "This documentation covers the Access Management Model-Driven App, its custom Dataverse tables, the associated Power Automate flows, and the Copilot Agent Layer. It does not cover the standard features of Microsoft Dynamics 365 or the underlying Azure infrastructure."
     *   A clear scope prevents "scope creep" and helps you focus your efforts on what's most important.
 
 ### 2. Document the System Architecture
@@ -21,9 +21,10 @@ This initial step is crucial as it sets the foundation for the entire documentat
 This section provides a high-level overview of the system, helping everyone understand how the pieces fit together.
 
 *   **2.1. Create a high-level architecture diagram:**
-    *   Use a tool like Visio, draw.io, or even PowerPoint.
+    *   Use a tool like Visio, draw.io, or even PowerPoint. The authoritative diagram is maintained in `AMS_ARCHITECTURE.MD`.
     *   The diagram should show the main components:
         *   Your Access Management System (is it a separate application?)
+        *   The **Copilot Agent Layer** (AI Assistants).
         *   Microsoft Dynamics 365 (CRM, etc.)
         *   Dataverse (as the central database)
         *   The Model-Driven App (as the user interface)
@@ -34,6 +35,7 @@ This section provides a high-level overview of the system, helping everyone unde
     *   For each box in your diagram, write a short paragraph explaining its function.
     *   **Example for Dataverse:** "Dataverse serves as the primary data repository for the Access Management System. It stores all custom tables related to access requests, approvals, and user permissions. It also hosts the business logic, such as business rules and workflows."
     *   **Example for Model-Driven App:** "The Model-Driven App provides the user interface for all access management tasks. It is built on top of the Dataverse tables and allows users to interact with the data through forms, views, and dashboards."
+    *   **Example for Copilot Agent Layer:** "The Copilot Agent Layer is an intelligent intermediary that assists users. It consists of a central orchestrator and specialized agents for different user personas (Requestor, Approver, Admin). This layer is documented in the architecture diagram and is implemented using a combination of Python for the core logic and Microsoft Copilot Studio for the user-facing interaction."
 
 ### 3. Detail the Dataverse Data Model
 
@@ -110,6 +112,14 @@ This section goes beyond the data and UI to explain the "brains" of the system.
     *   Create a flowchart or a step-by-step description of the entire lifecycle of an access request, from submission to fulfillment.
     *   Explain the different stages and what happens at each stage.
 
+*   **5.4. Document the Copilot Agent Framework:**
+    *   This section details the Python-based framework that powers the intelligent agents.
+    *   **Location:** The source code is located in the `src/agents/` directory.
+    *   **Components:**
+        *   **`orchestrator.py`:** Explain how the orchestrator loads agents and routes requests based on user persona.
+        *   **`base_agent.py`:** Describe the abstract base class that defines the common interface for all agents, including methods for processing requests and managing tools.
+        *   **Specialized Agents (`requestor_agent.py`, etc.):** Document the purpose and planned capabilities of each specialized agent.
+
 ### 6. Document Administration and Configuration
 
 This is a guide for the system administrators who will maintain the system.
@@ -117,6 +127,7 @@ This is a guide for the system administrators who will maintain the system.
 *   **6.1. Provide setup and configuration instructions:**
     *   If there are settings that can be changed, explain how. For example, you might have a "Configuration" table in Dataverse where you store email templates or approval timeout values. Document what each setting does and how to modify it.
     *   Explain how to set up new applications or roles that can be requested.
+    *   Explain how to build and configure the AI agents using Microsoft Copilot Studio, as detailed in the `AMS_COPILOT_STUDIO_GUIDE.MD` document.
 
 *   **6.2. Document user administration tasks:**
     *   Provide instructions for common administrative tasks, such as:
@@ -139,4 +150,5 @@ The final step is to polish and share your work.
 
 *   **7.3. Publish and maintain:**
     *   Make the documentation easily accessible to everyone who needs it.
-    *   Documentation is not a one-time task. As the system evolves, the documentation must be updated. Establish a clear process for who is responsible for keeping it current. For example, "All changes to the system must be accompanied by an update to the documentation."
+    *   Documentation is not a one-time task. As the system evolves, the documentation must be
+updated. Establish a clear process for who is responsible for keeping it current. For example, "All changes to the system must be accompanied by an update to the documentation."
