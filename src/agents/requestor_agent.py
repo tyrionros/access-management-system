@@ -34,14 +34,24 @@ class RequestorAgent(BaseAgent):
         """
         Processes a user query and returns a response.
         """
+        query_lower = query.lower()
         # Simple simulation of intent detection and tool usage
-        if "search" in query.lower() or "find" in query.lower() or "what roles" in query.lower():
-            # Extract a potential keyword (this is a very simple heuristic)
-            keywords = query.replace("search", "").replace("find", "").replace("for", "").strip()
-            results = self.search_roles(keywords)
+        if any(word in query_lower for word in ["search", "find", "what roles", "list"]):
+            # Extract keywords by removing command verbs and common stop words
+            stop_words = ["search", "find", "for", "what", "roles", "available", "list", "show", "me"]
+            words = query_lower.split()
+            keywords = [w for w in words if w not in stop_words]
+            search_query = " ".join(keywords) if keywords else query_lower
+
+            results = self.search_roles(search_query)
             
+            # If no results with stripped keywords, try with the original query (excluding "search/find")
+            if not results and search_query != query_lower:
+                search_query = query_lower.replace("search", "").replace("find", "").strip()
+                results = self.search_roles(search_query)
+
             if not results:
-                return f"I couldn't find any roles matching '{keywords}'. Can you try another keyword?"
+                return f"I couldn't find any roles matching '{search_query}'. Can you try another keyword?"
             
             response = f"I found {len(results)} matching roles:\n"
             for r in results[:5]:  # Limit to 5 for brevity
