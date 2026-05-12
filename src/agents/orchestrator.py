@@ -37,34 +37,22 @@ class AgentOrchestrator:
 
 # Example usage (can be removed later)
 if __name__ == '__main__':
-    # This is a placeholder for how the orchestrator might be used.
-    # In a real scenario, agents would be loaded dynamically.
-    
-    # Dummy agent implementations for demonstration
-    class RequestorAgent(BaseAgent):
-        def get_persona(self) -> str:
-            return "Requestor"
-        def get_tools(self) -> list:
-            return ["search_roles", "request_access"]
-        def process_request(self, query: str) -> str:
-            return f"Requestor Agent processing: {query}"
-
-    class ApproverAgent(BaseAgent):
-        def get_persona(self) -> str:
-            return "Approver"
-        def get_tools(self) -> list:
-            return ["summarize_request", "view_history"]
-        def process_request(self, query: str) -> str:
-            return f"Approver Agent processing: {query}"
+    from .requestor_agent import RequestorAgent
+    from .approver_agent import ApproverAgent
+    from .admin_agent import AdminAgent
 
     # Initialize orchestrator and register agents
     orchestrator = AgentOrchestrator()
     orchestrator.register_agent(RequestorAgent())
     orchestrator.register_agent(ApproverAgent())
+    orchestrator.register_agent(AdminAgent())
 
     # Route requests
-    requestor_response = orchestrator.route_request("Requestor", "I need access to the sales app.")
-    print(requestor_response)
+    print("--- Requestor Agent ---")
+    print(orchestrator.route_request("Requestor", "find roles for sales"))
 
-    approver_response = orchestrator.route_request("Approver", "Summarize this request for me.")
-    print(approver_response)
+    print("\n--- Approver Agent ---")
+    print(orchestrator.route_request("Approver", "view history for Priya"))
+
+    print("\n--- Admin Agent ---")
+    print(orchestrator.route_request("Admin", "show me the audit logs"))
