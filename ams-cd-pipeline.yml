@@ -5,20 +5,24 @@ trigger: none # This pipeline is triggered by the CI pipeline completion
 
 resources:
   pipelines:
-  - pipeline: ams-ci # Alias for the CI pipeline
-    source: ams-ci-pipeline # Name of the CI pipeline definition
+  - pipeline: ams-ci
+    source: ams-ci-pipeline
     trigger:
       branches:
       - develop
       - release/*
 
 variables:
+  - name: ServiceConnection
+    value: 'ams-service-connection'
+  - name: SolutionName
+    value: 'AccessManagementSystem'
   - name: BuildEnvironmentUrl
-    value: 'YOUR_BUILD_ENVIRONMENT_URL'
+    value: 'https://ams-build.crm.dynamics.com'
   - name: UATEnvironmentUrl
-    value: 'YOUR_UAT_ENVIRONMENT_URL'
+    value: 'https://ams-uat.crm.dynamics.com'
   - name: ProductionEnvironmentUrl
-    value: 'YOUR_PRODUCTION_ENVIRONMENT_URL'
+    value: 'https://ams-prod.crm.dynamics.com'
 
 stages:
 - stage: GenerateManagedSolution
@@ -41,19 +45,19 @@ stages:
       displayName: 'Import Unmanaged Solution to Build Env'
       inputs:
         authenticationType: 'servicePrincipal'
-        PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+        PowerPlatformSPN: '$(ServiceConnection)'
         Environment: '$(BuildEnvironmentUrl)'
-        SolutionInputFile: '$(Pipeline.Workspace)/unmanaged/AccessManagementSystem_unmanaged.zip'
+        SolutionInputFile: '$(Pipeline.Workspace)/unmanaged/$(SolutionName)_unmanaged.zip'
         HoldingSolution: true
 
     - task: PowerPlatformExportSolution@2
       displayName: 'Export Managed Solution from Build Env'
       inputs:
         authenticationType: 'servicePrincipal'
-        PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+        PowerPlatformSPN: '$(ServiceConnection)'
         Environment: '$(BuildEnvironmentUrl)'
-        SolutionName: 'AccessManagementSystem'
-        SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/AccessManagementSystem_managed.zip'
+        SolutionName: '$(SolutionName)'
+        SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/$(SolutionName)_managed.zip'
         Managed: true
 
     - task: PublishBuildArtifacts@1
@@ -88,9 +92,9 @@ stages:
             displayName: 'Import Managed Solution to UAT'
             inputs:
               authenticationType: 'servicePrincipal'
-              PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+              PowerPlatformSPN: '$(ServiceConnection)'
               Environment: '$(UATEnvironmentUrl)'
-              SolutionInputFile: '$(Pipeline.Workspace)/managed/AccessManagementSystem_managed.zip'
+              SolutionInputFile: '$(Pipeline.Workspace)/managed/$(SolutionName)_managed.zip'
 
 - stage: DeployToProduction
   displayName: 'Deploy to Production'
@@ -117,6 +121,6 @@ stages:
             displayName: 'Import Managed Solution to Production'
             inputs:
               authenticationType: 'servicePrincipal'
-              PowerPlatformSPN: 'YOUR_SERVICE_CONNECTION'
+              PowerPlatformSPN: '$(ServiceConnection)'
               Environment: '$(ProductionEnvironmentUrl)'
-              SolutionInputFile: '$(Pipeline.Workspace)/managed/AccessManagementSystem_managed.zip'
+              SolutionInputFile: '$(Pipeline.Workspace)/managed/$(SolutionName)_managed.zip'

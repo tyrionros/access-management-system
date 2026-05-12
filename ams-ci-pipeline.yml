@@ -8,6 +8,12 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+variables:
+  - name: ServiceConnection
+    value: 'ams-service-connection'
+  - name: SolutionName
+    value: 'AccessManagementSystem'
+
 steps:
 - task: PowerPlatformToolInstaller@2
   displayName: 'Install Power Platform Build Tools'
@@ -15,8 +21,8 @@ steps:
 - task: PowerPlatformPackSolution@2
   displayName: 'Pack Solution'
   inputs:
-    SolutionSourceFolder: '$(Build.SourcesDirectory)/solutions/AccessManagementSystem'
-    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/AccessManagementSystem_unmanaged.zip'
+    SolutionSourceFolder: '$(Build.SourcesDirectory)/solutions/$(SolutionName)'
+    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)/$(SolutionName)_unmanaged.zip'
     SolutionType: 'Unmanaged'
 
 - task: PublishBuildArtifacts@1
